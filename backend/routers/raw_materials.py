@@ -12,50 +12,66 @@ from ..schemas import (
 
 
 router = APIRouter(
-    prefix="/api/products",
-    tags=["Produtos"],
+    prefix="/api/raw-materials",
+    tags=["Matérias-Primas"],
 )
 
 
 # =========================================================
-# LISTAR PRODUTOS — PÚBLICO
+# LISTAR MATÉRIAS-PRIMAS — PÚBLICO
 # =========================================================
 
-@router.get("/", response_model=list[ProductResponse])
-def list_products(db: Session = Depends(get_db)):
+@router.get(
+    "/",
+    response_model=list[ProductResponse],
+)
+def list_raw_materials(
+    db: Session = Depends(get_db),
+):
     return (
         db.query(Product)
+        .join(Product.category)
+        .filter(
+            Product.category.has(slug="materias-primas"),
+            Product.active == True,
+        )
         .order_by(Product.id.desc())
         .all()
     )
 
 
 # =========================================================
-# BUSCAR PRODUTO — PÚBLICO
+# BUSCAR MATÉRIA-PRIMA — PÚBLICO
 # =========================================================
 
-@router.get("/{product_id}", response_model=ProductResponse)
-def get_product(
+@router.get(
+    "/{product_id}",
+    response_model=ProductResponse,
+)
+def get_raw_material(
     product_id: int,
     db: Session = Depends(get_db),
 ):
     product = (
         db.query(Product)
-        .filter(Product.id == product_id)
+        .filter(
+            Product.id == product_id,
+            Product.category.has(slug="materias-primas"),
+        )
         .first()
     )
 
     if not product:
         raise HTTPException(
             status_code=404,
-            detail="Produto não encontrado.",
+            detail="Matéria-prima não encontrada.",
         )
 
     return product
 
 
 # =========================================================
-# CRIAR PRODUTO — ADM
+# CRIAR MATÉRIA-PRIMA — ADM
 # =========================================================
 
 @router.post(
@@ -63,7 +79,7 @@ def get_product(
     response_model=ProductResponse,
     status_code=201,
 )
-def create_product(
+def create_raw_material(
     product_data: ProductCreate,
     db: Session = Depends(get_db),
     admin: str = Depends(require_admin),
@@ -88,14 +104,14 @@ def create_product(
 
 
 # =========================================================
-# ATUALIZAR PRODUTO — ADM
+# ATUALIZAR MATÉRIA-PRIMA — ADM
 # =========================================================
 
 @router.put(
     "/{product_id}",
     response_model=ProductResponse,
 )
-def update_product(
+def update_raw_material(
     product_id: int,
     product_data: ProductUpdate,
     db: Session = Depends(get_db),
@@ -103,14 +119,17 @@ def update_product(
 ):
     product = (
         db.query(Product)
-        .filter(Product.id == product_id)
+        .filter(
+            Product.id == product_id,
+            Product.category.has(slug="materias-primas"),
+        )
         .first()
     )
 
     if not product:
         raise HTTPException(
             status_code=404,
-            detail="Produto não encontrado.",
+            detail="Matéria-prima não encontrada.",
         )
 
     update_data = product_data.model_dump(
@@ -127,30 +146,35 @@ def update_product(
 
 
 # =========================================================
-# EXCLUIR PRODUTO — ADM
+# EXCLUIR MATÉRIA-PRIMA — ADM
 # =========================================================
 
-@router.delete("/{product_id}")
-def delete_product(
+@router.delete(
+    "/{product_id}"
+)
+def delete_raw_material(
     product_id: int,
     db: Session = Depends(get_db),
     admin: str = Depends(require_admin),
 ):
     product = (
         db.query(Product)
-        .filter(Product.id == product_id)
+        .filter(
+            Product.id == product_id,
+            Product.category.has(slug="materias-primas"),
+        )
         .first()
     )
 
     if not product:
         raise HTTPException(
             status_code=404,
-            detail="Produto não encontrado.",
+            detail="Matéria-prima não encontrada.",
         )
 
     db.delete(product)
     db.commit()
 
     return {
-        "message": "Produto excluído com sucesso."
+        "message": "Matéria-prima excluída com sucesso."
     }

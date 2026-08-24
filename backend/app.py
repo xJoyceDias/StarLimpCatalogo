@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 
+from backend.routers import raw_materials, settings
+
 from .database import Base, engine
 from . import models
-from .routers import products, categories
+from .routers import products, categories, essences, bases, raw_materials, kits, settings, auth
 
 
 # =========================================================
@@ -15,7 +17,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-
 # =========================================================
 # BANCO DE DADOS
 # =========================================================
@@ -24,6 +25,12 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(products.router)
 app.include_router(categories.router)
+app.include_router(essences.router)
+app.include_router(bases.router)
+app.include_router(raw_materials.router)
+app.include_router(kits.router)
+app.include_router(settings.router)
+app.include_router(auth.router)
 
 # =========================================================
 # ROTA DE TESTE
@@ -44,3 +51,14 @@ def health():
         "status": "ok",
         "database": "catalog.db",
     }
+
+    from .routers import (
+    products,
+    categories,
+    essences,
+    bases,
+    raw_materials,
+    kits,
+    settings,
+    auth,
+)

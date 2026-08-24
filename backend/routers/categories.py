@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from ..auth import require_admin
 from ..database import get_db
 from ..models import Category
 from ..schemas import (
@@ -17,11 +18,16 @@ router = APIRouter(
 
 
 # =========================================================
-# LISTAR CATEGORIAS
+# LISTAR CATEGORIAS — PÚBLICO
 # =========================================================
 
-@router.get("/", response_model=list[CategoryResponse])
-def list_categories(db: Session = Depends(get_db)):
+@router.get(
+    "/",
+    response_model=list[CategoryResponse],
+)
+def list_categories(
+    db: Session = Depends(get_db),
+):
     return (
         db.query(Category)
         .order_by(Category.name.asc())
@@ -30,7 +36,7 @@ def list_categories(db: Session = Depends(get_db)):
 
 
 # =========================================================
-# BUSCAR CATEGORIA
+# BUSCAR CATEGORIA — PÚBLICO
 # =========================================================
 
 @router.get(
@@ -57,7 +63,7 @@ def get_category(
 
 
 # =========================================================
-# CRIAR CATEGORIA
+# CRIAR CATEGORIA — ADM
 # =========================================================
 
 @router.post(
@@ -68,6 +74,7 @@ def get_category(
 def create_category(
     category_data: CategoryCreate,
     db: Session = Depends(get_db),
+    admin: str = Depends(require_admin),
 ):
     existing_category = (
         db.query(Category)
@@ -98,7 +105,7 @@ def create_category(
 
 
 # =========================================================
-# ATUALIZAR CATEGORIA
+# ATUALIZAR CATEGORIA — ADM
 # =========================================================
 
 @router.put(
@@ -109,6 +116,7 @@ def update_category(
     category_id: int,
     category_data: CategoryUpdate,
     db: Session = Depends(get_db),
+    admin: str = Depends(require_admin),
 ):
     category = (
         db.query(Category)
@@ -131,6 +139,7 @@ def update_category(
             "name",
             category.name,
         )
+
         new_slug = update_data.get(
             "slug",
             category.slug,
@@ -164,13 +173,16 @@ def update_category(
 
 
 # =========================================================
-# EXCLUIR CATEGORIA
+# EXCLUIR CATEGORIA — ADM
 # =========================================================
 
-@router.delete("/{category_id}")
+@router.delete(
+    "/{category_id}"
+)
 def delete_category(
     category_id: int,
     db: Session = Depends(get_db),
+    admin: str = Depends(require_admin),
 ):
     category = (
         db.query(Category)

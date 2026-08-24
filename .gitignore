@@ -38,3 +38,7 @@ database/*backup*.db
 
 .DS_Store
 Thumbs.db
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
