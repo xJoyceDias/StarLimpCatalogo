@@ -259,7 +259,6 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
     <button class="cat active px-5 py-3 rounded-[20px] text-sm font-bold" data-cat="Todos" onclick="setCategory('Todos')"><i class="fa-solid fa-grid-2 mr-2"></i>Todos</button>
     <button class="cat px-5 py-3 rounded-[20px] text-sm font-semibold text-gray-400" data-cat="Produtos" onclick="setCategory('Produtos')"><i class="fa-solid fa-spray-can-sparkles mr-2"></i>Produtos</button>
     <button class="cat px-5 py-3 rounded-[20px] text-sm font-semibold text-gray-400" data-cat="Fragrâncias" onclick="setCategory('Fragrâncias')"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Fragrâncias</button>
-    <button id="essencias-para-desinfetante" class="cat px-5 py-3 rounded-[20px] text-sm font-semibold text-gray-400" data-cat="Essências para Desinfetante" onclick="setCategory('Essências para Desinfetante')"><i class="fa-solid fa-droplet mr-2"></i>Essências para Desinfetante</button>
     <button class="cat px-5 py-3 rounded-[20px] text-sm font-semibold text-gray-400" data-cat="Matérias-Primas" onclick="setCategory('Matérias-Primas')"><i class="fa-solid fa-flask mr-2"></i>Matérias-Primas</button>
     <button class="cat px-5 py-3 rounded-[20px] text-sm font-semibold text-gray-400" data-cat="Kits" onclick="setCategory('Kits')"><i class="fa-solid fa-box-open mr-2"></i>Kits</button>
     <button class="cat px-5 py-3 rounded-[20px] text-sm font-semibold text-gray-400" data-cat="Mais Vendidos" onclick="setCategory('Mais Vendidos')"><i class="fa-solid fa-fire mr-2"></i>Mais Vendidos</button>
@@ -268,7 +267,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
 
 <section id="catalogo" class="container-x py-16">
   <div class="flex items-end justify-between gap-4 mb-7">
-    <div><p class="text-blue-400 text-xs font-bold tracking-[.18em] uppercase mb-2">Seleção Star Limp</p><h2 id="catalogTitle" class="section-title font-display text-3xl md:text-4xl font-extrabold">Destaques para você</h2></div>
+    <div><p class="text-blue-400 text-xs font-bold tracking-[.18em] uppercase mb-2">Seleção Star Limp</p><h2 class="section-title font-display text-3xl md:text-4xl font-extrabold">Destaques para você</h2></div>
     <button class="hidden sm:flex text-sm text-blue-300 hover:text-white items-center gap-2" onclick="setCategory('Todos')">Ver todos os produtos <i class="fa-solid fa-arrow-right"></i></button>
   </div>
   <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5"></div>
@@ -420,7 +419,6 @@ const money=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 function save(){localStorage.setItem("starLimpCart",JSON.stringify(state.cart));localStorage.setItem("starLimpFavorites",JSON.stringify(state.favorites));localStorage.setItem("starLimpCoupon",state.coupon)}
 function productImage(p){return `<div class="mini-bottle ${p.type||''}"></div>`}
 function renderProducts(){
- document.getElementById("catalogTitle").textContent=state.category==="Essências para Desinfetante"?state.category:"Destaques para você";
  const q=document.getElementById("search").value.toLowerCase().trim();
  let list=CATALOG_ITEMS.filter(p=>(state.category==="Todos"||p.cat===state.category||(state.category==="Mais Vendidos"&&["MAIS VENDIDO","MAIS ESCOLHIDO"].includes(p.badge))) && (!q||`${p.name} ${p.cat} ${p.desc}`.toLowerCase().includes(q)));
  document.getElementById("productGrid").innerHTML=list.map(p=>`
@@ -439,7 +437,7 @@ function renderProducts(){
      <button onclick="changeQty(${p.id},-1)" class="w-7 h-7 text-gray-400 hover:text-white">−</button><span class="text-xs font-bold">${getQty(p.id)}</span><button onclick="changeQty(${p.id},1)" class="w-7 h-7 text-gray-400 hover:text-white">+</button>
    </div>
   </div>
- </article>`).join("") || `<div class="col-span-full py-16 px-5 text-center glass rounded-[26px]" role="status">${state.category==="Essências para Desinfetante"&&!q?`<i class="fa-solid fa-droplet text-3xl text-blue-400 mb-4" aria-hidden="true"></i><h3 class="font-display text-xl font-extrabold text-white">Essências para Desinfetante</h3><p class="text-gray-400 mt-3">Os produtos desta categoria ainda não estão disponíveis no catálogo.</p><a href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá, Star Limp! Gostaria de consultar as essências para desinfetante disponíveis, volumes e preços.')}" target="_blank" rel="noopener noreferrer" class="btn-primary inline-flex items-center gap-2 mt-6 px-5 py-3 rounded-xl font-bold text-white"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i>Consultar pelo WhatsApp</a>`:`<p class="text-gray-500">Nenhum produto encontrado. Tente outro termo.</p>`}</div>`;
+ </article>`).join("") || `<div class="col-span-full py-16 text-center text-gray-500">Nenhum produto encontrado. Tente outro termo.</div>`;
  updateCartUI();
 }
 function getQty(id){return state.cart.find(x=>x.id===id)?.qty||0}
@@ -511,12 +509,7 @@ function checkoutWhatsApp(){
 function openWhatsApp(){window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá, Star Limp! Gostaria de tirar uma dúvida sobre os produtos.")}`,"_blank")}
 let toastTimer;
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2200)}
-function openLinkedCategory(){
- if(location.hash==="#essencias-para-desinfetante")setCategory("Essências para Desinfetante");
-}
-window.addEventListener("hashchange",openLinkedCategory);
 renderProducts();
-openLinkedCategory();
 </script>
 </body>
 </html>
